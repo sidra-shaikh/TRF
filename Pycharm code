@@ -1,0 +1,40 @@
+import cv2
+import numpy as np
+import serial
+arduinoData = serial.Serial('COM5', 9600)
+
+cap = cv2.VideoCapture(1)
+while True:
+    ret, frame = cap.read()
+    blurred_frame = cv2.GaussianBlur(frame, (5, 5), 0)
+    hsv = cv2.cvtColor(blurred_frame, cv2.COLOR_BGR2HSV)
+
+    lower = np.array([10, 197, 60])
+    upper = np.array([49, 255, 255])
+    mask = cv2.inRange(hsv, lower, upper)
+
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    ans=0
+    for contour in contours:
+        area = cv2.contourArea(contour)
+        if area>1000:
+            cv2.drawContours(frame, contour, -1, (0, 255, 0), 2)
+            #ans=55+(abs(12150-area)/212.3)#blue bottle
+            #ans=40+(abs(2550-area)/61.11)#pink ball
+            ans=30+(abs(25350-area)/940)
+           # print(area)
+    cv2.putText(frame,'%.2fcm' % ans, (10,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2, cv2.LINE_AA)
+    if ans<52 and ans>44:
+        arduinoData.write('F'.encode())
+        print("Forward")
+    elif ans == 0:
+        arduinoData.write('S'.encode())
+        print("Stop")
+    cv2.imshow("Frame", frame)
+    cv2.imshow("Mask", mask)
+    key = cv2.waitKey(30)
+    if key == 27:
+        break
+
+cap.release()
+cv2.destroyAllWindows()
