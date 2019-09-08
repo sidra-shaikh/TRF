@@ -1,28 +1,43 @@
-int m1=10,m2=11;
-int d1=5,d2=6, d3=7, d4=8;
-int pwm1,pwm2;
-int base_pwm1 = 120, base_pwm2 = 120;
+int m1 = 10, m2 = 11;
+int d1 = 5, d2 = 6, d3 = 7, d4 = 8;
+int pwm1, pwm2;
+int base_pwm1 = 150, base_pwm2 = 150;
 char arduinoData;
 void setup() {
-Serial.begin(9600);
-  pinMode(m1, OUTPUT);
+Serial2.begin(9600);
+pinMode(m1, OUTPUT);
   pinMode(m2, OUTPUT);
   pinMode(d1, OUTPUT);
   pinMode(d2, OUTPUT);
   pinMode(d3, OUTPUT);
   pinMode(d4, OUTPUT);
-  pinMode(13,OUTPUT);
  }
 
 void loop() {
   // put your main code here, to run repeatedly:
-if(Serial.available()>0){ // only send data back if data has been sent
-arduinoData = Serial.read(); // read the incoming data
-Serial.println(arduinoData);
-Serial.println("Working");
+if(Serial2.available()){ // only send data back if data has been sent
+arduinoData = Serial2.read(); // read the incoming data
+Serial2.println(arduinoData);
 if (arduinoData=='F')
 {
   pwm1 = base_pwm1;
   pwm2 = base_pwm2;
   Serial.println("Forward");
+
+}
+ else if (arduinoData=='S')
+{
+  pwm1 = base_pwm1-40;
+  pwm2 = base_pwm2+40;
+  Serial.println("Turn Right");
+}  
+
+digitalWrite(d1,HIGH);
+digitalWrite(d2,LOW);
+digitalWrite(d3,LOW);
+digitalWrite(d4,HIGH);
+analogWrite(m1,pwm1);
+analogWrite(m2,pwm2);
+
+}
 }
